@@ -1,17 +1,892 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="my">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#092a36">
-    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Atom Topup</title>
-    <link rel="icon" type="image/png" href="1000039366.png">
-    <link rel="apple-touch-icon" href="1000039366.png">
-    <link rel="manifest" href="manifest.json">
+    <style>
+        :root {
+            --primary: #0056b3;
+            --secondary: #00a8e8;
+            --bg: #f0f4f8;
+            --card: #ffffff;
+            --text: #1e293b;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --warning: #eab308;
+        }
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .app-container {
+            width: 100%;
+            max-width: 450px;
+            background: var(--card);
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0,0,0,0.08);
+            position: relative;
+            padding-bottom: 75px;
+        }
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .app-logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 2px solid white;
+            background: #e0f2fe;
+        }
+        .header h1 {
+            font-size: 20px;
+            font-weight: 700;
+        }
+        .header p {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        .btn-logout {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        /* Notice Banner for Buyers */
+        .buyer-notice {
+            margin: 12px 15px 0;
+            padding: 10px 12px;
+            background: #fef3c7;
+            border-left: 4px solid #d97706;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #78350f;
+            display: none;
+        }
+        .closed-banner {
+            margin: 12px 15px;
+            padding: 14px;
+            background: #fee2e2;
+            border: 1.5px solid #f87171;
+            border-radius: 12px;
+            color: #991b1b;
+            font-size: 13px;
+            font-weight: 700;
+            text-align: center;
+            line-height: 1.5;
+            display: none;
+        }
+
+        /* Auth Screens */
+        .auth-box {
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .auth-logo {
+            width: 110px;
+            height: 110px;
+            border-radius: 20px;
+            object-fit: cover;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 12px rgba(0,86,179,0.2);
+            background: #e0f2fe;
+        }
+        .input-group {
+            text-align: left;
+            margin-bottom: 12px;
+        }
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #475569;
+        }
+        .input-group input, .input-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 14px;
+            outline: none;
+        }
+        .input-group input:focus, .input-group textarea:focus {
+            border-color: var(--primary);
+        }
+        .btn-primary {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+        .btn-admin-login {
+            width: 100%;
+            background: #0f172a;
+            color: white;
+            border: none;
+            padding: 11px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 12px;
+        }
+        .otp-hint {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 12px 15px 5px;
+            gap: 6px;
+        }
+        .tab-btn {
+            flex: 1 1 30%;
+            padding: 9px 6px;
+            border: none;
+            background: #e2e8f0;
+            color: #475569;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Package Grid */
+        .section {
+            padding: 15px;
+            display: none;
+        }
+        .section.active {
+            display: block;
+        }
+        .section-title {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--primary);
+            border-left: 4px solid var(--secondary);
+            padding-left: 8px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        .grid-full {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+        .pkg-card {
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+            background: #f8fafc;
+        }
+        .pkg-card:hover, .pkg-card.selected {
+            border-color: var(--primary);
+            background: #eff6ff;
+            box-shadow: 0 4px 10px rgba(0,86,179,0.12);
+        }
+        .pkg-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .pkg-desc {
+            font-size: 12px;
+            color: #64748b;
+            margin: 3px 0;
+        }
+        .pkg-price {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-top: 4px;
+        }
+
+        /* Payment Box */
+        .payment-box {
+            margin: 15px;
+            padding: 15px;
+            background: #f8fafc;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 14px;
+        }
+        .pay-account {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 10px 12px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .pay-info span {
+            display: block;
+        }
+        .pay-type {
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--primary);
+        }
+        .pay-num {
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .pay-owner {
+            font-size: 12px;
+            color: #64748b;
+        }
+        .btn-copy {
+            background: #e0f2fe;
+            color: var(--primary);
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .preview-img {
+            width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+            border-radius: 8px;
+            margin-top: 10px;
+            display: none;
+            border: 1px solid #cbd5e1;
+        }
+
+        /* Bottom Nav */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 450px;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 4px;
+            z-index: 10;
+        }
+        .nav-item {
+            background: none;
+            border: none;
+            font-size: 11px;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+        }
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        /* Orders & Admin */
+        .order-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+        }
+        .user-item-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+        .user-item-card.blocked {
+            background: #fef2f2;
+            border-color: #fca5a5;
+        }
+        .op-toggle-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 8px 10px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .msg-card {
+            background: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin-bottom: 10px;
+        }
+        .admin-reply-box {
+            margin-top: 8px;
+            padding: 8px 10px;
+            background: #eff6ff;
+            border-left: 3px solid var(--primary);
+            border-radius: 6px;
+            font-size: 12px;
+            color: #1e3a8a;
+        }
+        .btn-block {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .btn-unblock {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .badge-pending {
+            background: #fef9c3;
+            color: #854d0e;
+        }
+        .badge-done {
+            background: #dcfce7;
+            color: #166534;
+        }
+        .badge-blocked {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .admin-proof-box {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f0fdf4;
+            border: 1px dashed #86efac;
+            border-radius: 8px;
+        }
+        .admin-setting-box {
+            background: #f8fafc;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+        .price-edit-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        .price-edit-item {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 8px;
+        }
+        .price-edit-item label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #334155;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .price-edit-item input {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+        .summary-box {
+            background: linear-gradient(135deg, #eff6ff, #f0fdf4);
+            border: 1.5px solid #93c5fd;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            padding: 5px 0;
+            border-bottom: 1px dashed #cbd5e1;
+        }
+        .summary-row:last-of-type {
+            border-bottom: none;
+        }
+        .summary-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--primary);
+            padding-top: 8px;
+            margin-top: 4px;
+            border-top: 1.5px solid #60a5fa;
+        }
+        .btn-approve {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 9px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+            width: 100%;
+        }
+        .btn-delete-order {
+            background: #fee2e2;
+            color: var(--danger);
+            border: 1px solid #fca5a5;
+            padding: 8px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+            width: 100%;
+        }
+        .btn-clear-all {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+        }
+        .btn-toggle-shop {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 8px;
+        }
+        .btn-toggle-shop.is-closed {
+            background: var(--success);
+        }
+        .proof-img {
+            width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+            border-radius: 8px;
+            margin-top: 6px;
+            border: 1px solid #86efac;
+            background: #ffffff;
+        }
+        .hidden {
+            display: none !important;
+        }
+    </style>
 </head>
 <body>
-                   <label>Admin Password အသစ်</label>
+
+<div class="app-container">
+
+    <!-- 1. LOGIN & OTP SCREEN -->
+    <div id="auth-screen" class="auth-box">
+        <img id="auth-logo-img" src="1000033524.jpg" onerror="this.style.display='none'" alt="Atom Topup Logo" class="auth-logo">
+        <h2 style="color: var(--primary); margin-bottom: 5px;">Atom Topup</h2>
+        <p style="font-size: 13px; color: #64748b; margin-bottom: 20px;">လျင်မြန်စိတ်ချရသော ငွေဖြည့်နှင့် ဒေတာဝန်ဆောင်မှု</p>
+
+        <!-- Step 1: Phone Input (Direct Ph + Pass if registered) -->
+        <div id="step-phone">
+            <div class="input-group">
+                <label>ဖုန်းနံပါတ်ထည့်ပါ (အကောင့်ရှိပြီးသားဆို Ph + Password ဖြင့်ဝင်ပါ)</label>
+                <input type="tel" id="login-phone" placeholder="ဥပမာ - 097XXXXXXXX" maxlength="11">
+            </div>
+            <div id="direct-pass-group" class="input-group hidden">
+                <label>အကောင့် Password (ဂဏန်း ၆ လုံး) ထည့်ပါ</label>
+                <input type="password" id="direct-pass-input" placeholder="ဂဏန်း ၆ လုံး Password ထည့်ပါ" maxlength="6" inputmode="numeric">
+            </div>
+            <button id="btn-phone-action" class="btn-primary" onclick="handlePhoneContinue()">ဆက်လက်လုပ်ဆောင်မည်</button>
+            <button class="btn-admin-login" onclick="toggleAdminLogin(true)">🛡️ Admin Login ဝင်ရန်</button>
+        </div>
+
+        <!-- Step 2: OTP Input (New User Only) -->
+        <div id="step-otp" class="hidden">
+            <div id="otp-display" class="otp-hint"></div>
+            <div class="input-group">
+                <label>OTP ကုဒ် (ဂဏန်း ၄ လုံး) ထည့်ပါ</label>
+                <input type="number" id="otp-input" placeholder="OTP ကုဒ်ရိုက်ထည့်ပါ">
+            </div>
+            <button class="btn-primary" onclick="verifyOTP()">OTP အတည်ပြုမည်</button>
+        </div>
+
+        <!-- Step 3: Name & 6-Digit Password (New User Only) -->
+        <div id="step-profile" class="hidden">
+            <div class="input-group">
+                <label>သင်၏အမည်ထည့်ပါ</label>
+                <input type="text" id="user-name" placeholder="အမည်ရိုက်ထည့်ပါ">
+            </div>
+            <div class="input-group">
+                <label>Password ဂဏန်း ၆ လုံး သတ်မှတ်ပါ</label>
+                <input type="password" id="user-pass" placeholder="ဂဏန်း ၆ လုံး (ဥပမာ - 123456)" maxlength="6" inputmode="numeric">
+            </div>
+            <button class="btn-primary" onclick="completeLogin()">အကောင့်ဖွင့်ပြီး ဝင်မည်</button>
+        </div>
+
+        <!-- Admin Login Box -->
+        <div id="admin-login-box" class="hidden">
+            <div class="input-group">
+                <label>Admin Password ထည့်ပါ</label>
+                <input type="password" id="admin-pin-input" placeholder="Admin Password ရိုက်ထည့်ပါ" maxlength="25">
+            </div>
+            <button class="btn-primary" onclick="loginAsAdmin()">Admin ဝင်မည်</button>
+            <button class="btn-logout" style="background:#e2e8f0; color:#334155; margin-top:10px; width:100%;" onclick="toggleAdminLogin(false)">ဝယ်သူ Login သို့ ပြန်သွားမည်</button>
+        </div>
+    </div>
+
+    <!-- 2. MAIN APP SCREEN -->
+    <div id="main-screen" class="hidden">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <img id="header-logo-img" src="1000033524.jpg" onerror="this.style.display='none'" alt="Logo" class="app-logo">
+                <div>
+                    <h1>Atom Topup</h1>
+                    <p id="welcome-user">ကြိုဆိုပါတယ်</p>
+                </div>
+            </div>
+            <button class="btn-logout" onclick="logout()">ထွက်မည်</button>
+        </div>
+
+        <!-- Buyer Notice & Shop Closed Banners -->
+        <div id="buyer-notice-banner" class="buyer-notice"></div>
+        <div id="buyer-closed-banner" class="closed-banner"></div>
+
+        <!-- SHOP PAGE (Buyer) -->
+        <div id="page-shop">
+            <!-- Category Tabs -->
+            <div class="tabs" id="shop-tabs">
+                <button class="tab-btn active" onclick="switchTab('bill', this)">1. Atom Bill</button>
+                <button class="tab-btn" onclick="switchTab('data', this)">2. Atom Data</button>
+                <button class="tab-btn" onclick="switchTab('plan', this)">3. Atom Plan</button>
+                <button id="tab-mytel" class="tab-btn hidden" onclick="switchTab('mytel', this)">Mytel Data</button>
+                <button id="tab-u9" class="tab-btn hidden" onclick="switchTab('u9', this)">U9 Data</button>
+                <button id="tab-mpt" class="tab-btn hidden" onclick="switchTab('mpt', this)">MPT Data</button>
+            </div>
+
+            <!-- 1. Atom Bill Section -->
+            <div id="sec-bill" class="section active">
+                <div class="section-title">Atom Bill ငွေဖြည့်ရန် (1,000 မှ 10,000 ထိ)</div>
+                <div class="grid" id="bill-grid"></div>
+            </div>
+
+            <!-- 2. Atom Data Section -->
+            <div id="sec-data" class="section">
+                <div class="section-title">Atom Data ပက်ကေ့ချ်များ (1GB မှ 5GB ထိ)</div>
+                <div class="grid" id="data-grid"></div>
+            </div>
+
+            <!-- 3. Atom Plan Section -->
+            <div id="sec-plan" class="section">
+                <div class="section-title">Atom Plan အထူးပက်ကေ့ချ်များ</div>
+                <div class="grid-full" id="plan-grid"></div>
+            </div>
+
+            <!-- 4. Mytel Data Section -->
+            <div id="sec-mytel" class="section">
+                <div class="section-title">Mytel Data ပက်ကေ့ချ်များ</div>
+                <div class="grid" id="mytel-grid"></div>
+            </div>
+
+            <!-- 5. U9 Data Section -->
+            <div id="sec-u9" class="section">
+                <div class="section-title">U9 Data ပက်ကေ့ချ်များ</div>
+                <div class="grid" id="u9-grid"></div>
+            </div>
+
+            <!-- 6. MPT Data Section -->
+            <div id="sec-mpt" class="section">
+                <div class="section-title">MPT Data ပက်ကေ့ချ်များ</div>
+                <div class="grid" id="mpt-grid"></div>
+            </div>
+
+            <!-- Payment & Slip Upload Box -->
+            <div class="payment-box">
+                <div class="section-title" style="margin-bottom: 10px;">ငွေလွှဲရန် အကောင့်များ (Name: mzh)</div>
+                
+                <div class="pay-account">
+                    <div class="pay-info">
+                        <span class="pay-type">KBZ Pay (KPay)</span>
+                        <span class="pay-num">09750050068</span>
+                        <span class="pay-owner">Account Name: mzh</span>
+                    </div>
+                    <button class="btn-copy" onclick="copyText('09750050068')">Copy</button>
+                </div>
+
+                <div class="pay-account">
+                    <div class="pay-info">
+                        <span class="pay-type" style="color: #d97706;">Wave Pay</span>
+                        <span class="pay-num">09672435183</span>
+                        <span class="pay-owner">Account Name: mzh</span>
+                    </div>
+                    <button class="btn-copy" onclick="copyText('09672435183')">Copy</button>
+                </div>
+
+                <hr style="border: 0; border-top: 1px solid #cbd5e1; margin: 15px 0;">
+
+                <div id="selected-summary" style="background: #e0f2fe; padding: 10px; border-radius: 8px; font-size: 13px; margin-bottom: 12px; font-weight: 600; color: #0369a1;">
+                    ရွေးချယ်ထားသော ပက်ကေ့ချ်: မရှိသေးပါ
+                </div>
+
+                <div class="input-group">
+                    <label>ငွေဖြည့်မည့် ဖုန်းနံပါတ်</label>
+                    <input type="tel" id="target-phone" placeholder="097XXXXXXXX / 096XXXXXXXX / 094XXXXXXXX">
+                </div>
+
+                <div class="input-group">
+                    <label>ငွေလွှဲပြေစာ (Screenshot) ပုံတင်ရန်</label>
+                    <input type="file" id="slip-file" accept="image/*" onchange="previewSlip(event)">
+                    <img id="slip-preview" class="preview-img" alt="Slip Preview">
+                </div>
+
+                <button id="btn-submit-order" class="btn-primary" onclick="submitOrder()">Order တင်မည်</button>
+            </div>
+        </div>
+
+        <!-- MY ORDERS PAGE (Buyer) -->
+        <div id="page-orders" class="section">
+            <div class="section-title">ကျွန်ုပ်၏ Order မှတ်တမ်းများ</div>
+            <div id="user-orders-list"></div>
+        </div>
+
+        <!-- BUYER MESSAGE TO ADMIN PAGE -->
+        <div id="page-chat" class="section">
+            <div class="section-title">💬 Admin ဆီသို့ စာပို့ရန်</div>
+            <div class="admin-setting-box">
+                <div class="input-group" style="margin-bottom: 8px;">
+                    <label>Admin ထံ ပို့လိုသော စာရေးပါ</label>
+                    <textarea id="buyer-msg-input" rows="3" placeholder="ဥပမာ - ပြေစာမှားတင်မိပါတယ် / ငွေထည့်ပေးပါဦး..."></textarea>
+                </div>
+                <button class="btn-primary" onclick="sendMessageToAdmin()">Admin ဆီသို့ စာပို့မည်</button>
+            </div>
+            <div class="section-title">ကျွန်ုပ်၏ စာများ နှင့် Admin ပြန်ကြားချက်</div>
+            <div id="buyer-messages-list"></div>
+        </div>
+
+        <!-- BUYER ACCOUNT SETTINGS PAGE (Change Ph & Password) -->
+        <div id="page-account" class="section">
+            <div class="section-title">⚙️ အကောင့် ဖုန်းနံပါတ် နှင့် Password ပြောင်းရန်</div>
+            <div class="admin-setting-box">
+                <div class="input-group">
+                    <label>ဖုန်းနံပါတ်အသစ်</label>
+                    <input type="tel" id="edit-buyer-phone" placeholder="09XXXXXXXXX" maxlength="11">
+                </div>
+                <div class="input-group">
+                    <label>Password အသစ် (ဂဏန်း ၆ လုံး)</label>
+                    <input type="password" id="edit-buyer-pass" placeholder="ဂဏန်း ၆ လုံး ရိုက်ထည့်ပါ" maxlength="6" inputmode="numeric">
+                </div>
+                <button class="btn-primary" onclick="updateBuyerAccount()">အကောင့် အချက်အလက် သိမ်းဆည်းမည်</button>
+            </div>
+        </div>
+
+        <!-- ADMIN PANEL PAGE (Admin Only) -->
+        <div id="page-admin" class="section">
+            <!-- App Image Changer -->
+            <div class="admin-setting-box">
+                <div class="section-title" style="margin-bottom: 8px;">🖼️ Topup App ပုံ ပြောင်းလဲရန်</div>
+                <input type="file" accept="image/*" onchange="handleAppLogoChange(event)" style="font-size:12px; width:100%;">
+                <img id="admin-logo-preview" class="proof-img" style="display:none;" alt="New App Logo Preview">
+                <button class="btn-approve" onclick="saveAppLogo()">App ပုံ အသစ် သိမ်းဆည်းမည်</button>
+            </div>
+
+            <!-- Mytel / U9 / MPT Show/Hide Control -->
+            <div class="admin-setting-box">
+                <div class="section-title" style="margin-bottom: 8px;">📶 Mytel / U9 / MPT ဒေတာ ပေါ်အောင် / ဖျောက်ထားရန်</div>
+                <div class="op-toggle-row">
+                    <span>Mytel Data</span>
+                    <button id="btn-toggle-mytel" class="btn-block" onclick="toggleOperatorVisibility('mytel')">ဖျောက်ထားသည် (Hidden)</button>
+                </div>
+                <div class="op-toggle-row">
+                    <span>U9 Data</span>
+                    <button id="btn-toggle-u9" class="btn-block" onclick="toggleOperatorVisibility('u9')">ဖျောက်ထားသည် (Hidden)</button>
+                </div>
+                <div class="op-toggle-row" style="margin-bottom:0;">
+                    <span>MPT Data</span>
+                    <button id="btn-toggle-mpt" class="btn-block" onclick="toggleOperatorVisibility('mpt')">ဖျောက်ထားသည် (Hidden)</button>
+                </div>
+            </div>
+
+            <!-- Buyer Messages & Admin Reply Box -->
+            <div class="admin-setting-box">
+                <div class="section-title" style="margin-bottom: 8px;">📩 ဝယ်သူများထံမှ စာများ (ပြန်လည်ဖြေရှင်း / ဖျက်ရန်)</div>
+                <div id="admin-messages-list"></div>
+            </div>
+
+            <!-- Buyer Accounts, Phone List & Purchase Totals -->
+            <div class="admin-setting-box">
+                <div class="section-title" style="margin-bottom: 8px;">👥 အကောင့်ဝင်သူ ဦးရေ ၊ Ph ၊ နာမည် နှင့် ဝယ်ယူငွေစာရင်း</div>
+                <div class="summary-row">
+                    <span>စုစုပေါင်း ဝယ်သူအကောင့် ဦးရေ:</span>
+                    <strong id="stat-total-users">0 ဦး</strong>
+                </div>
+                <div class="summary-row" style="margin-bottom: 10px;">
+                    <span>Block ပိတ်ထားသော လူလိမ်ဖုန်း ဦးရေ:</span>
+                    <strong id="stat-blocked-users" style="color:#dc2626;">0 ဦး</strong>
+                </div>
+                <div id="admin-users-list"></div>
+                <button class="btn-clear-all" onclick="clearAllUsers()">🧹 အကောင့်ဝင်သူ စာရင်း All ဖျက်ရှင်းမည်</button>
+            </div>
+
+            <!-- Close / Open Order Control & Schedule -->
+            <div class="admin-setting-box">
+                <div class="section-title" style="margin-bottom: 8px;">🚫 Order ပိတ် / ဖွင့် နှင့် ပိတ်ချိန် သတ်မှတ်ရန်</div>
+                <div style="font-size: 12px; color: #475569; margin-bottom: 8px;">
+                    လက်ရှိအခြေအနေ: <strong id="admin-shop-status">ဖွင့်ထားသည် (Open)</strong>
+                </div>
+                <div class="input-group" style="margin-bottom: 8px;">
+                    <label>Atom Bill / Data / Plan အလိုအလျောက် ပိတ်ချိန် (ဥပမာ - 22:30)</label>
+                    <div style="display:flex; gap:8px;">
+                        <input type="time" id="auto-close-time" style="flex:1;">
+                        <button class="btn-primary" style="width:auto; padding:8px 12px; margin-top:0; font-size:12px;" onclick="saveAutoCloseTime()">ပိတ်ချိန် သိမ်းမည်</button>
+                        <button class="btn-logout" style="background:#e2e8f0; color:#334155;" onclick="clearAutoCloseTime()">ဖျက်မည်</button>
+                    </div>
+                </div>
+                <button id="btn-toggle-shop" class="btn-toggle-shop" onclick="toggleShopClose()">Close 🚫Ord ပိတ်ထားမည်</button>
+            </div>
+
+            <!-- Send Notice to Buyers -->
+            <div class="admin-setting-box">
+                <div class="section-title" style="margin-bottom: 8px;">📢 ဝယ်သူများအကောင့်သို့ အကြောင်းကြားစာ ပို့ရန်</div>
+                <div class="input-group" style="margin-bottom: 8px;">
+                    <label>အကြောင်းကြားစာ ရိုက်ထည့်ပါ</label>
+                    <textarea id="admin-notice-input" rows="2" placeholder="ဝယ်သူများထံ ပို့လိုသော အကြောင်းကြားစာ ရေးပါ..."></textarea>
+                </div>
+                <div style="display:flex; gap:8px;">
+                    <button class="btn-primary" style="flex:1; padding:9px; font-size:13px;" onclick="sendBuyerNotice()">အကြောင်းကြားစာ ပို့မည်</button>
+                    <button class="btn-logout" style="background:#fee2e2; color:#dc2626;" onclick="clearBuyerNotice()">ဖျက်မည်</button>
+                </div>
+            </div>
+
+            <!-- Edit Prices for Bill / Data / Plan / Mytel / U9 / MPT -->
+            <div class="admin-setting-box">
+                <div class="section-title" style="margin-bottom: 8px;">💰 Bill / Data / Plan / Mytel / U9 / MPT ဈေးနှုန်းများ ပြောင်းလဲရန်</div>
+                <p style="font-size: 11px; color: #64748b; margin-bottom: 8px;">ဈေးနှုန်းများ ပြင်ဆင်ပြီး သိမ်းဆည်းပါက ဝယ်သူဘက်တွင် ချက်ချင်းပြောင်းလဲသွားပါမည်။</p>
+                <div id="price-editor-list" class="price-edit-grid"></div>
+                <button class="btn-approve" onclick="saveUpdatedPrices()">ဈေးနှုန်းများ သိမ်းဆည်းမည်</button>
+            </div>
+
+            <!-- Daily Sales Summary -->
+            <div class="summary-box">
+                <div class="section-title" style="margin-bottom: 8px;">📊 တစ်နေ့တာ ငွေစာရင်းပေါင်းချုပ် (ထည့်ပေးပြီးစာရင်း)</div>
+                <div class="summary-row">
+                    <span>Atom Bill ရငွေ:</span>
+                    <strong id="sum-bill">0 Ks</strong>
+                </div>
+                <div class="summary-row">
+                    <span>Atom Data ရငွေ:</span>
+                    <strong id="sum-data">0 Ks</strong>
+                </div>
+                <div class="summary-row">
+                    <span>Atom Plan ရငွေ:</span>
+                    <strong id="sum-plan">0 Ks</strong>
+                </div>
+                <div class="summary-row">
+                    <span>Mytel / U9 / MPT ရငွေ:</span>
+                    <strong id="sum-other-op">0 Ks</strong>
+                </div>
+                <div class="summary-total">
+                    <span>တစ်နေ့တာ စုစုပေါင်းရငွေ:</span>
+                    <span id="sum-total">0 Ks</span>
+                </div>
+                <button class="btn-clear-all" onclick="clearAllOrders()">🧹 တစ်နေ့တာစာရင်း All ဖျက်ရှင်းမည်</button>
+            </div>
+
+            <!-- Change Admin Password -->
+            <div class="admin-setting-box">
+                <div class="section-title" style="margin-bottom: 8px;">🔑 Admin ဝင်ရန် Password ပြောင်းရန်</div>
+                <div class="input-group" style="margin-bottom: 10px;">
+                    <label>လက်ရှိ Admin Password</label>
+                    <input type="password" id="current-admin-pass" placeholder="လက်ရှိ Password ထည့်ပါ" maxlength="25">
+                </div>
+                <div class="input-group" style="margin-bottom: 10px;">
+                    <label>Admin Password အသစ်</label>
                     <input type="password" id="new-admin-pass" placeholder="Password အသစ် ထည့်ပါ" maxlength="25">
                 </div>
                 <button class="btn-primary" style="padding: 10px; font-size: 13px;" onclick="changeAdminPassword()">Password ချိန်းမည်</button>
@@ -264,3 +1139,1003 @@
         if (!target) return;
 
         const inputEl = document.getElementById(`admin-reply-input-${index}`);
+        const replyText = ((window.adminReplyDrafts && window.adminReplyDrafts[index]) || (inputEl ? inputEl.value : '') || '').trim();
+
+        if (!replyText) {
+            alert('ကျေးဇူးပြု၍ ဝယ်သူအား ပြန်လည်ဖြေရှင်းမည့် စာကို ရိုက်ထည့်ပါ။');
+            return;
+        }
+
+        msgs[index].adminReply = replyText;
+        msgs[index].repliedAt = new Date().toLocaleString();
+        saveMessages(msgs);
+        if (window.adminReplyDrafts) delete window.adminReplyDrafts[index];
+        renderMessages();
+        alert(`${target.senderName} (${target.senderPhone}) ထံ ဖြေရှင်းစာ ပို့ပြီးပါပြီ။`);
+    }
+
+    function deleteAdminMessage(index) {
+        if (!currentUser || currentUser.role !== 'admin') return;
+        const msgs = getMessages();
+        const target = msgs[index];
+        if (!target) return;
+
+        if (confirm(`${target.senderName} (${target.senderPhone}) ၏ စာကို ဖျက်ရှင်းမှာ သေချာပါသလား?`)) {
+            msgs.splice(index, 1);
+            if (window.adminReplyDrafts) window.adminReplyDrafts = {};
+            saveMessages(msgs);
+            renderMessages();
+        }
+    }
+
+    function renderMessages() {
+        const msgs = getMessages();
+        const buyerList = document.getElementById('buyer-messages-list');
+        const adminList = document.getElementById('admin-messages-list');
+
+        if (buyerList) {
+            buyerList.innerHTML = '';
+            const myMsgs = currentUser && currentUser.role === 'buyer'
+                ? msgs.filter(m => m.senderPhone === currentUser.phone)
+                : [];
+
+            if (myMsgs.length === 0) {
+                buyerList.innerHTML = '<p style="font-size:12px; color:#64748b;">ပို့ထားသော စာ မရှိသေးပါ။</p>';
+            } else {
+                myMsgs.forEach(m => {
+                    const replyHtml = m.adminReply
+                        ? `<div class="admin-reply-box">
+                             <strong>🛡️ Admin ဖြေရှင်းချက်:</strong> ${m.adminReply}
+                             <div style="font-size:10px; color:#3b82f6; margin-top:3px;">${m.repliedAt}</div>
+                           </div>`
+                        : `<div style="font-size:11px; color:#d97706; margin-top:6px;">⏳ Admin ပြန်ကြားချက် စောင့်ဆိုင်းနေဆဲ...</div>`;
+
+                    buyerList.innerHTML += `
+                        <div class="msg-card">
+                            <div style="font-size:13px; color:#0f172a;"><strong>ကျွန်ုပ်:</strong> ${m.message}</div>
+                            <div style="font-size:11px; color:#94a3b8; margin-top:3px;">${m.time}</div>
+                            ${replyHtml}
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        if (adminList) {
+            adminList.innerHTML = '';
+            if (msgs.length === 0) {
+                adminList.innerHTML = '<p style="font-size:12px; color:#64748b;">ဝယ်သူများထံမှ စာ မရှိသေးပါ။</p>';
+            } else {
+                msgs.forEach((m, idx) => {
+                    const existingReplyHtml = m.adminReply
+                        ? `<div class="admin-reply-box" style="margin-bottom:8px;">
+                             <strong>✅ ဖြေရှင်းပြီးစာ:</strong> ${m.adminReply}
+                             <div style="font-size:10px; color:#3b82f6; margin-top:2px;">${m.repliedAt}</div>
+                           </div>`
+                        : '';
+
+                    adminList.innerHTML += `
+                        <div class="msg-card">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <strong style="font-size:13px; color:var(--primary);">${m.senderName} (${m.senderPhone})</strong>
+                                <span style="font-size:11px; color:#94a3b8;">${m.time}</span>
+                            </div>
+                            <div style="font-size:13px; color:#0f172a; margin:6px 0;"><strong>စာ:</strong> ${m.message}</div>
+                            ${existingReplyHtml}
+                            <div class="input-group" style="margin-bottom:6px;">
+                                <input type="text" id="admin-reply-input-${idx}" placeholder="ဝယ်သူကို ပြန်လည်ဖြေရှင်းစာ ရေးပါ..." oninput="handleAdminReplyInput(${idx}, this.value)">
+                            </div>
+                            <div style="display:flex; gap:8px;">
+                                <button class="btn-primary" style="flex:1; padding:8px; font-size:12px; margin-top:0;" onclick="sendAdminReply(${idx})">ပြန်လည်ဖြေရှင်းမည်</button>
+                                <button class="btn-delete-order" style="width:auto; padding:8px 10px; margin-top:0;" onclick="deleteAdminMessage(${idx})">🗑️ စာဖျက်မည်</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+        }
+    }
+
+    function getRegisteredUsers() {
+        return JSON.parse(localStorage.getItem('atom_registered_users')) || [];
+    }
+
+    function saveRegisteredUsers(users) {
+        localStorage.setItem('atom_registered_users', JSON.stringify(users));
+    }
+
+    function getBlockedPhones() {
+        return JSON.parse(localStorage.getItem('atom_blocked_phones')) || [];
+    }
+
+    function saveBlockedPhones(list) {
+        localStorage.setItem('atom_blocked_phones', JSON.stringify(list));
+    }
+
+    function isPhoneBlocked(phone) {
+        return getBlockedPhones().includes(phone);
+    }
+
+    function toggleBlockUser(phone) {
+        if (!currentUser || currentUser.role !== 'admin') return;
+        let blocked = getBlockedPhones();
+        if (blocked.includes(phone)) {
+            if (confirm(`ဖုန်းနံပါတ် ${phone} ကို Block ဖြည်ပြီး ပြန်လည်အသုံးပြုခွင့်ပေးမှာ သေချာပါသလား?`)) {
+                blocked = blocked.filter(p => p !== phone);
+                saveBlockedPhones(blocked);
+                renderUsersAdmin();
+                alert(`ဖုန်းနံပါတ် ${phone} ကို Block ဖြည်ပြီးပါပြီ။`);
+            }
+        } else {
+            if (confirm(`လူလိမ်အကောင့် ဖုန်းနံပါတ် ${phone} ကို Block ပိတ်လိုက်မှာ သေချာပါသလား? နောက်နောင် ဤဖုန်းဖြင့် ပြန်ဝင်၍ ရတော့မည် မဟုတ်ပါ။`)) {
+                blocked.push(phone);
+                saveBlockedPhones(blocked);
+                renderUsersAdmin();
+                alert(`ဖုန်းနံပါတ် ${phone} ကို Block ပိတ်လိုက်ပါပြီ။`);
+            }
+        }
+    }
+
+    function deleteSingleUser(phone) {
+        if (!currentUser || currentUser.role !== 'admin') return;
+        if (!confirm(`အကောင့်ဝင်သူ ဖုန်းနံပါတ် ${phone} ကို စာရင်းထဲမှ ဖျက်ရှင်းမှာ သေချာပါသလား?`)) return;
+        const users = getRegisteredUsers().filter(u => u.phone !== phone);
+        saveRegisteredUsers(users);
+        renderUsersAdmin();
+    }
+
+    function clearAllUsers() {
+        if (!currentUser || currentUser.role !== 'admin') return;
+        if (!confirm('အကောင့်ဝင်သူ ဦးရေစာရင်းအားလုံးကို All ဖျက်ရှင်းမှာ သေချာပါသလား?')) return;
+        saveRegisteredUsers([]);
+        renderUsersAdmin();
+        alert('အကောင့်ဝင်သူ စာရင်းအားလုံးကို ဖျက်ရှင်းပြီးပါပြီ။');
+    }
+
+    function renderUsersAdmin() {
+        const users = getRegisteredUsers();
+        const blocked = getBlockedPhones();
+        const orders = JSON.parse(localStorage.getItem('atom_orders')) || [];
+        const listEl = document.getElementById('admin-users-list');
+        const totalEl = document.getElementById('stat-total-users');
+        const blockedEl = document.getElementById('stat-blocked-users');
+
+        if (totalEl) totalEl.innerText = `${users.length} ဦး`;
+        if (blockedEl) blockedEl.innerText = `${blocked.length} ဦး`;
+        if (!listEl) return;
+
+        listEl.innerHTML = '';
+        if (users.length === 0) {
+            listEl.innerHTML = '<p style="font-size:12px; color:#64748b;">အကောင့်ဖွင့်ထားသော ဝယ်သူ မရှိသေးပါ။</p>';
+            return;
+        }
+
+        users.forEach(u => {
+            const isBlk = blocked.includes(u.phone);
+            const buyerOrders = orders.filter(o => o.buyerPhone === u.phone);
+            const approvedTotal = buyerOrders
+                .filter(o => o.approved)
+                .reduce((sum, o) => sum + (Number(o.price) || 0), 0);
+            const pendingTotal = buyerOrders
+                .filter(o => !o.approved)
+                .reduce((sum, o) => sum + (Number(o.price) || 0), 0);
+
+            listEl.innerHTML += `
+                <div class="user-item-card ${isBlk ? 'blocked' : ''}">
+                    <div>
+                        <div style="font-size:13px; font-weight:700;">နာမည်: ${u.name} ${isBlk ? '<span class="badge badge-blocked">BLOCKED</span>' : '<span class="badge badge-done">ACTIVE</span>'}</div>
+                        <div style="font-size:12px; color:#334155;">အကောင့် Ph: <strong>${u.phone}</strong></div>
+                        <div style="font-size:12px; color:var(--primary); font-weight:600; margin-top:2px;">ဝယ်ထားသောငွေ: ${approvedTotal.toLocaleString()} Ks (အတည်ပြုပြီး)</div>
+                        ${pendingTotal > 0 ? `<div style="font-size:11px; color:#b45309;">စစ်ဆေးဆဲ အော်ဒါငွေ: ${pendingTotal.toLocaleString()} Ks</div>` : ''}
+                        <div style="font-size:11px; color:#94a3b8;">ဖောက်သည့်အချိန်: ${u.joinedAt || ''}</div>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:5px;">
+                        <button class="${isBlk ? 'btn-unblock' : 'btn-block'}" onclick="toggleBlockUser('${u.phone}')">
+                            ${isBlk ? '✅ Unblock' : '🚫 Block'}
+                        </button>
+                        <button class="btn-block" style="background:#475569;" onclick="deleteSingleUser('${u.phone}')">🗑️ ဖျက်မည်</button>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    function getPackagesData() {
+        const saved = JSON.parse(localStorage.getItem('atom_packages'));
+        if (saved && saved.bill && saved.data && saved.plan) {
+            return {
+                bill: saved.bill,
+                data: saved.data,
+                plan: saved.plan,
+                mytel: saved.mytel || DEFAULT_MYTEL_PKGS,
+                u9: saved.u9 || DEFAULT_U9_PKGS,
+                mpt: saved.mpt || DEFAULT_MPT_PKGS
+            };
+        }
+        return {
+            bill: DEFAULT_BILL_PKGS,
+            data: DEFAULT_DATA_PKGS,
+            plan: DEFAULT_PLAN_PKGS,
+            mytel: DEFAULT_MYTEL_PKGS,
+            u9: DEFAULT_U9_PKGS,
+            mpt: DEFAULT_MPT_PKGS
+        };
+    }
+
+    function getAdminPin() {
+        return localStorage.getItem('atom_admin_pin') || DEFAULT_ADMIN_PIN;
+    }
+
+    function isShopClosed() {
+        const manualClosed = localStorage.getItem('atom_shop_manual_closed') === 'true';
+        if (manualClosed) return true;
+
+        const closeTime = localStorage.getItem('atom_auto_close_time');
+        if (closeTime) {
+            const now = new Date();
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mm = String(now.getMinutes()).padStart(2, '0');
+            const currentHHMM = `${hh}:${mm}`;
+            if (currentHHMM >= closeTime) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function applyShopStateUI() {
+        const closed = isShopClosed();
+        const closedBanner = document.getElementById('buyer-closed-banner');
+        const submitBtn = document.getElementById('btn-submit-order');
+        const statusEl = document.getElementById('admin-shop-status');
+        const toggleBtn = document.getElementById('btn-toggle-shop');
+
+        if (closedBanner) {
+            closedBanner.style.display = closed ? 'block' : 'none';
+            closedBanner.innerText = CLOSED_MESSAGE;
+        }
+        if (submitBtn) {
+            submitBtn.disabled = closed;
+            submitBtn.style.opacity = closed ? '0.5' : '1';
+        }
+        if (statusEl) {
+            const closeTime = localStorage.getItem('atom_auto_close_time');
+            statusEl.innerText = closed
+                ? `ပိတ်ထားသည် (Closed)${closeTime ? ' - ပိတ်ချိန် ' + closeTime : ''}`
+                : `ဖွင့်ထားသည် (Open)${closeTime ? ' - ပိတ်ချိန် ' + closeTime : ''}`;
+            statusEl.style.color = closed ? '#dc2626' : '#16a34a';
+        }
+        if (toggleBtn) {
+            const manualClosed = localStorage.getItem('atom_shop_manual_closed') === 'true';
+            if (manualClosed) {
+                toggleBtn.innerText = '✅ Order ပြန်ဖွင့်မည် (Open Ord)';
+                toggleBtn.classList.add('is-closed');
+            } else {
+                toggleBtn.innerText = 'Close 🚫Ord ပိတ်ထားမည်';
+                toggleBtn.classList.remove('is-closed');
+            }
+        }
+
+        const notice = localStorage.getItem('atom_buyer_notice') || '';
+        const noticeBanner = document.getElementById('buyer-notice-banner');
+        if (noticeBanner) {
+            if (notice.trim()) {
+                noticeBanner.style.display = 'block';
+                noticeBanner.innerHTML = `<strong>📢 Admin အကြောင်းကြားစာ:</strong> ${notice}`;
+            } else {
+                noticeBanner.style.display = 'none';
+            }
+        }
+    }
+
+    function toggleShopClose() {
+        if (!currentUser || currentUser.role !== 'admin') return;
+        const manualClosed = localStorage.getItem('atom_shop_manual_closed') === 'true';
+        localStorage.setItem('atom_shop_manual_closed', (!manualClosed).toString());
+        applyShopStateUI();
+        alert(!manualClosed ? CLOSED_MESSAGE : 'Order ပြန်လည်ဖွင့်လှစ်ပြီးပါပြီ။');
+    }
+
+    function saveAutoCloseTime() {
+        if (!currentUser || currentUser.role !== 'admin') return;
+        const timeVal = document.getElementById('auto-close-time').value;
+        if (!timeVal) {
+            alert('ကျေးဇူးပြု၍ ပိတ်ချိန် ရွေးချယ်ပါ။');
+            return;
+        }
+        localStorage.setItem('atom_auto_close_time', timeVal);
+        applyShopStateUI();
+        alert(`ဝန်ဆောင်မှု ပိတ်ချိန်ကို ${timeVal} ဟု သတ်မှတ်ပြီးပါပြီ။`);
+    }
+
+    function clearAutoCloseTime() {
+        if (!currentUser || currentUser.role !== 'admin') return;
+        localStorage.removeItem('atom_auto_close_time');
+        document.getElementById('auto-close-time').value = '';
+        applyShopStateUI();
+        alert('အလိုအလျောက် ပိတ်ချိန်ကို ဖျက်လိုက်ပါပြီ။');
+    }
+
+    function sendBuyerNotice() {
+        if (!currentUser || currentUser.role !== 'admin') return;
+        const msg = document.getElementById('admin-notice-input').value.trim();
+        if (!msg) {
+            alert('ကျေးဇူးပြု၍ အကြောင်းကြားစာ ရိုက်ထည့်ပါ။');
+            return;
+        }
+        localStorage.setItem('atom_buyer_notice', msg);
+        applyShopStateUI();
+        alert('ဝယ်သူများအကောင့်သို့ အကြောင်းကြားစာ ပို့ပြီးပါပြီ။');
+    }
+
+    function clearBuyerNotice() {
+        if (!currentUser || currentUser.role !== 'admin') return;
+        localStorage.removeItem('atom_buyer_notice');
+        document.getElementById('admin-notice-input').value = '';
+        applyShopStateUI();
+        alert('အကြောင်းကြားစာကို ဖျက်လိုက်ပါပြီ။');
+    }
+
+    function renderPriceEditor() {
+        const pkgData = getPackagesData();
+        const container = document.getElementById('price-editor-list');
+        if (!container) return;
+        container.innerHTML = '';
+
+        const allItems = [
+            ...pkgData.bill.map(p => ({ ...p, cat: 'bill' })),
+            ...pkgData.data.map(p => ({ ...p, cat: 'data' })),
+            ...pkgData.plan.map(p => ({ ...p, cat: 'plan' })),
+            ...pkgData.mytel.map(p => ({ ...p, cat: 'mytel' })),
+            ...pkgData.u9.map(p => ({ ...p, cat: 'u9' })),
+            ...pkgData.mpt.map(p => ({ ...p, cat: 'mpt' }))
+        ];
+
+        allItems.forEach(item => {
+            container.innerHTML += `
+                <div class="price-edit-item">
+                    <label>${item.title}</label>
+                    <input type="number" data-cat="${item.cat}" data-id="${item.id}" value="${item.price}" min="1">
+                </div>
+            `;
+        });
+    }
+
+    function saveUpdatedPrices() {
+        if (!currentUser || currentUser.role !== 'admin') return;
+        const pkgData = getPackagesData();
+        const inputs = document.querySelectorAll('#price-editor-list input');
+
+        inputs.forEach(inp => {
+            const cat = inp.getAttribute('data-cat');
+            const id = inp.getAttribute('data-id');
+            const val = Number(inp.value);
+            if (!isNaN(val) && val > 0) {
+                const target = pkgData[cat].find(item => item.id === id);
+                if (target) target.price = val;
+            }
+        });
+
+        localStorage.setItem('atom_packages', JSON.stringify(pkgData));
+        selectedPackage = null;
+        document.getElementById('selected-summary').innerText = 'ရွေးချယ်ထားသော ပက်ကေ့ချ်: မရှိသေးပါ';
+        renderPackages();
+        alert('Bill / Data / Plan / Mytel / U9 / MPT ဈေးနှုန်းများကို ပြင်ဆင်သိမ်းဆည်းပြီးပါပြီ။');
+    }
+
+    function changeAdminPassword() {
+        if (!currentUser || currentUser.role !== 'admin') return;
+        const currPass = document.getElementById('current-admin-pass').value.trim();
+        const newPass = document.getElementById('new-admin-pass').value.trim();
+
+        if (currPass !== getAdminPin()) {
+            alert('လက်ရှိ Admin Password မှားယွင်းနေပါသည်။');
+            return;
+        }
+        if (newPass.length < 4) {
+            alert('Password အသစ်သည် အနည်းဆုံး ၄ လုံး ရှိရပါမည်။');
+            return;
+        }
+
+        localStorage.setItem('atom_admin_pin', newPass);
+        document.getElementById('current-admin-pass').value = '';
+        document.getElementById('new-admin-pass').value = '';
+        alert('Admin ဝင်ရန် Password အသစ်ကို ပြောင်းလဲသိမ်းဆည်းပြီးပါပြီ။');
+    }
+
+    let generatedOTP = '';
+    let pendingPhone = '';
+    let currentUser = JSON.parse(localStorage.getItem('atom_user')) || null;
+    let selectedPackage = null;
+    let slipBase64 = '';
+    let adminProofMap = {};
+
+    function playOrderSound() {
+        try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            const ctx = new AudioCtx();
+            const notes = [587.33, 783.99, 1046.50];
+            notes.forEach((freq, idx) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.12);
+                gain.gain.setValueAtTime(0.25, ctx.currentTime + idx * 0.12);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.12 + 0.35);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(ctx.currentTime + idx * 0.12);
+                osc.stop(ctx.currentTime + idx * 0.12 + 0.35);
+            });
+        } catch (e) {
+            console.log('Audio not supported');
+        }
+    }
+
+    window.onload = function() {
+        applySavedAppLogo();
+        renderPackages();
+        renderPriceEditor();
+        applyOperatorVisibilityUI();
+        const savedTime = localStorage.getItem('atom_auto_close_time');
+        if (savedTime && document.getElementById('auto-close-time')) {
+            document.getElementById('auto-close-time').value = savedTime;
+        }
+        const savedNotice = localStorage.getItem('atom_buyer_notice');
+        if (savedNotice && document.getElementById('admin-notice-input')) {
+            document.getElementById('admin-notice-input').value = savedNotice;
+        }
+        applyShopStateUI();
+        setInterval(applyShopStateUI, 30000);
+
+        if (currentUser) {
+            if (currentUser.role === 'buyer' && isPhoneBlocked(currentUser.phone)) {
+                localStorage.removeItem('atom_user');
+                currentUser = null;
+                alert(BLOCKED_PHONE_MESSAGE);
+                return;
+            }
+            showMainApp();
+        }
+    };
+
+    function toggleAdminLogin(showAdmin) {
+        document.getElementById('step-phone').classList.toggle('hidden', showAdmin);
+        document.getElementById('direct-pass-group').classList.add('hidden');
+        document.getElementById('btn-phone-action').innerText = 'ဆက်လက်လုပ်ဆောင်မည်';
+        document.getElementById('step-otp').classList.add('hidden');
+        document.getElementById('step-profile').classList.add('hidden');
+        document.getElementById('admin-login-box').classList.toggle('hidden', !showAdmin);
+    }
+
+    function loginAsAdmin() {
+        const pin = document.getElementById('admin-pin-input').value.trim();
+        if (pin !== getAdminPin()) {
+            alert('Admin Password မှားယွင်းနေပါသည်။');
+            return;
+        }
+        currentUser = { role: 'admin', name: 'Admin (MZH)', phone: '09750050068' };
+        localStorage.setItem('atom_user', JSON.stringify(currentUser));
+        showMainApp();
+    }
+
+    function handlePhoneContinue() {
+        const phone = document.getElementById('login-phone').value.trim();
+        if (!phone.startsWith('09') || phone.length < 9) {
+            alert('ကျေးဇူးပြု၍ မှန်ကန်သော ဖုန်းနံပါတ် ထည့်ပါ။');
+            return;
+        }
+
+        if (isPhoneBlocked(phone)) {
+            alert(BLOCKED_PHONE_MESSAGE);
+            return;
+        }
+
+        pendingPhone = phone;
+        const users = getRegisteredUsers();
+        const existingUser = users.find(u => u.phone === phone);
+
+        if (existingUser) {
+            const passGroup = document.getElementById('direct-pass-group');
+            const passInput = document.getElementById('direct-pass-input');
+            const actionBtn = document.getElementById('btn-phone-action');
+
+            if (passGroup.classList.contains('hidden')) {
+                passGroup.classList.remove('hidden');
+                passInput.focus();
+                actionBtn.innerText = 'Ph & Password ဖြင့် ဝင်မည်';
+                return;
+            }
+
+            const pass = passInput.value.trim();
+            if (existingUser.pass !== pass) {
+                alert('Password မှားယွင်းနေပါသည်။ မှန်ကန်သော ဂဏန်း ၆ လုံး Password ထည့်ပါ။');
+                return;
+            }
+
+            currentUser = { role: 'buyer', phone: existingUser.phone, name: existingUser.name, pass: existingUser.pass };
+            localStorage.setItem('atom_user', JSON.stringify(currentUser));
+            showMainApp();
+            return;
+        }
+
+        generatedOTP = Math.floor(1000 + Math.random() * 9000).toString();
+        document.getElementById('step-phone').classList.add('hidden');
+        document.getElementById('step-otp').classList.remove('hidden');
+        const hint = document.getElementById('otp-display');
+        hint.style.display = 'block';
+        hint.innerText = `သင်၏ OTP ကုဒ်မှာ: ${generatedOTP} ဖြစ်ပါသည်`;
+    }
+
+    function verifyOTP() {
+        const inputOtp = document.getElementById('otp-input').value.trim();
+        if (inputOtp !== generatedOTP) {
+            alert('OTP ကုဒ် မှားယွင်းနေပါသည်။ ပြန်လည်စစ်ဆေးပါ။');
+            return;
+        }
+        document.getElementById('step-otp').classList.add('hidden');
+        document.getElementById('step-profile').classList.remove('hidden');
+    }
+
+    function completeLogin() {
+        const phone = pendingPhone || document.getElementById('login-phone').value.trim();
+        const name = document.getElementById('user-name').value.trim();
+        const pass = document.getElementById('user-pass').value.trim();
+
+        if (isPhoneBlocked(phone)) {
+            alert(BLOCKED_PHONE_MESSAGE);
+            return;
+        }
+        if (!name) {
+            alert('ကျေးဇူးပြု၍ အမည်ထည့်ပါ။');
+            return;
+        }
+        if (!/^\d{6}$/.test(pass)) {
+            alert('Password သည် ဂဏန်း ၆ လုံး အတိအကျ ဖြစ်ရပါမည်။');
+            return;
+        }
+
+        let users = getRegisteredUsers();
+        if (users.some(u => u.phone === phone)) {
+            alert('ဤဖုန်းနံပါတ်ဖြင့် အကောင့်ရှိပြီးသား ဖြစ်ပါသည်။ ဖုန်းနံပါတ်တစ်ခုလျှင် အကောင့်တစ်ခုသာ သုံးခွင့်ရှိပါသည်။');
+            return;
+        }
+
+        const newUserRecord = {
+            phone,
+            name,
+            pass,
+            joinedAt: new Date().toLocaleString()
+        };
+        users.unshift(newUserRecord);
+        saveRegisteredUsers(users);
+
+        currentUser = { role: 'buyer', phone, name, pass };
+        localStorage.setItem('atom_user', JSON.stringify(currentUser));
+        showMainApp();
+    }
+
+    function setupBottomNav() {
+        const nav = document.getElementById('bottom-nav');
+        if (currentUser.role === 'admin') {
+            nav.innerHTML = `
+                <button class="nav-item active" onclick="switchPage('admin', this)">🛡️ Admin စစ်ဆေးရန်</button>
+            `;
+        } else {
+            nav.innerHTML = `
+                <button class="nav-item active" onclick="switchPage('shop', this)">🏠 ဝယ်ယူရန်</button>
+                <button class="nav-item" onclick="switchPage('orders', this)">📋 အော်ဒါ</button>
+                <button class="nav-item" onclick="switchPage('chat', this)">💬 စာပို့</button>
+                <button class="nav-item" onclick="switchPage('account', this)">⚙️ အကောင့်</button>
+            `;
+        }
+    }
+
+    function showMainApp() {
+        applySavedAppLogo();
+        applyOperatorVisibilityUI();
+        document.getElementById('auth-screen').classList.add('hidden');
+        document.getElementById('main-screen').classList.remove('hidden');
+        document.getElementById('welcome-user').innerText = `${currentUser.name} (${currentUser.phone})`;
+        setupBottomNav();
+        renderPriceEditor();
+        renderUsersAdmin();
+        renderOrders();
+        renderMessages();
+        applyShopStateUI();
+
+        if (currentUser.role === 'admin') {
+            document.getElementById('page-shop').classList.add('hidden');
+            document.getElementById('page-orders').classList.remove('active');
+            document.getElementById('page-chat').classList.remove('active');
+            document.getElementById('page-account').classList.remove('active');
+            document.getElementById('page-admin').classList.add('active');
+        } else {
+            document.getElementById('target-phone').value = currentUser.phone;
+            document.getElementById('edit-buyer-phone').value = currentUser.phone;
+            document.getElementById('edit-buyer-pass').value = currentUser.pass || '';
+            document.getElementById('page-shop').classList.remove('hidden');
+            document.getElementById('page-chat').classList.remove('active');
+            document.getElementById('page-account').classList.remove('active');
+            document.getElementById('page-admin').classList.remove('active');
+        }
+    }
+
+    function logout() {
+        localStorage.removeItem('atom_user');
+        location.reload();
+    }
+
+    function renderPackages() {
+        const pkgData = getPackagesData();
+        const billGrid = document.getElementById('bill-grid');
+        const dataGrid = document.getElementById('data-grid');
+        const planGrid = document.getElementById('plan-grid');
+        const mytelGrid = document.getElementById('mytel-grid');
+        const u9Grid = document.getElementById('u9-grid');
+        const mptGrid = document.getElementById('mpt-grid');
+
+        billGrid.innerHTML = '';
+        dataGrid.innerHTML = '';
+        planGrid.innerHTML = '';
+        mytelGrid.innerHTML = '';
+        u9Grid.innerHTML = '';
+        mptGrid.innerHTML = '';
+
+        pkgData.bill.forEach(pkg => {
+            billGrid.innerHTML += `
+                <div class="pkg-card" onclick="selectPkg(this, 'bill', '${pkg.title}', ${pkg.price})">
+                    <div class="pkg-name">${pkg.title}</div>
+                    <div class="pkg-price">${pkg.price.toLocaleString()} Ks</div>
+                </div>
+            `;
+        });
+
+        pkgData.data.forEach(pkg => {
+            dataGrid.innerHTML += `
+                <div class="pkg-card" onclick="selectPkg(this, 'data', '${pkg.title}', ${pkg.price})">
+                    <div class="pkg-name">${pkg.title}</div>
+                    <div class="pkg-price">${pkg.price.toLocaleString()} Ks</div>
+                </div>
+            `;
+        });
+
+        pkgData.plan.forEach(pkg => {
+            planGrid.innerHTML += `
+                <div class="pkg-card" onclick="selectPkg(this, 'plan', '${pkg.title} (${pkg.desc})', ${pkg.price})">
+                    <div class="pkg-name">${pkg.title}</div>
+                    <div class="pkg-desc">${pkg.desc}</div>
+                    <div class="pkg-price">${pkg.price.toLocaleString()} Ks</div>
+                </div>
+            `;
+        });
+
+        pkgData.mytel.forEach(pkg => {
+            mytelGrid.innerHTML += `
+                <div class="pkg-card" onclick="selectPkg(this, 'mytel', '${pkg.title}', ${pkg.price})">
+                    <div class="pkg-name">${pkg.title}</div>
+                    <div class="pkg-price">${pkg.price.toLocaleString()} Ks</div>
+                </div>
+            `;
+        });
+
+        pkgData.u9.forEach(pkg => {
+            u9Grid.innerHTML += `
+                <div class="pkg-card" onclick="selectPkg(this, 'u9', '${pkg.title}', ${pkg.price})">
+                    <div class="pkg-name">${pkg.title}</div>
+                    <div class="pkg-price">${pkg.price.toLocaleString()} Ks</div>
+                </div>
+            `;
+        });
+
+        pkgData.mpt.forEach(pkg => {
+            mptGrid.innerHTML += `
+                <div class="pkg-card" onclick="selectPkg(this, 'mpt', '${pkg.title}', ${pkg.price})">
+                    <div class="pkg-name">${pkg.title}</div>
+                    <div class="pkg-price">${pkg.price.toLocaleString()} Ks</div>
+                </div>
+            `;
+        });
+    }
+
+    function switchTab(tab, btn) {
+        document.querySelectorAll('#shop-tabs .tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('#page-shop .section').forEach(s => s.classList.remove('active'));
+        document.getElementById('sec-' + tab).classList.add('active');
+    }
+
+    function selectPkg(el, category, title, price) {
+        document.querySelectorAll('.pkg-card').forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+        selectedPackage = { category, title, price };
+        document.getElementById('selected-summary').innerText = `ရွေးချယ်ထားသည်: ${title} — ကျသင့်ငွေ: ${price.toLocaleString()} Ks`;
+    }
+
+    function copyText(num) {
+        navigator.clipboard.writeText(num);
+        alert(`ဖုန်းနံပါတ် ${num} (mzh) ကို Copy ကူးပြီးပါပြီ။`);
+    }
+
+    function previewSlip(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                slipBase64 = e.target.result;
+                const img = document.getElementById('slip-preview');
+                img.src = slipBase64;
+                img.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function submitOrder() {
+        if (currentUser && currentUser.role === 'buyer' && isPhoneBlocked(currentUser.phone)) {
+            alert(BLOCKED_PHONE_MESSAGE);
+            logout();
+            return;
+        }
+        if (isShopClosed()) {
+            alert(CLOSED_MESSAGE);
+            return;
+        }
+        if (!selectedPackage) {
+            alert('ကျေးဇူးပြု၍ ဝယ်ယူလိုသော Bill သို့မဟုတ် Data ပက်ကေ့ချ်ကို အရင်ရွေးချယ်ပါ။');
+            return;
+        }
+        const targetPhone = document.getElementById('target-phone').value.trim();
+        if (!targetPhone) {
+            alert('ငွေဖြည့်မည့် ဖုန်းနံပါတ်ထည့်ပါ။');
+            return;
+        }
+        if (!slipBase64) {
+            alert('ကျေးဇူးပြု၍ ငွေလွှဲပြေစာပုံ (Screenshot) တင်ပေးပါ။');
+            return;
+        }
+
+        playOrderSound();
+
+        const orders = JSON.parse(localStorage.getItem('atom_orders')) || [];
+        const newOrder = {
+            id: 'ORD-' + Date.now().toString().slice(-5),
+            category: selectedPackage.category || 'bill',
+            buyerName: currentUser.name,
+            buyerPhone: currentUser.phone,
+            targetPhone: targetPhone,
+            packageTitle: selectedPackage.title,
+            price: selectedPackage.price,
+            slip: slipBase64,
+            adminProof: '',
+            status: 'စစ်ဆေးနေဆဲ (Pending)',
+            approved: false,
+            time: new Date().toLocaleString()
+        };
+
+        orders.unshift(newOrder);
+        localStorage.setItem('atom_orders', JSON.stringify(orders));
+
+        alert('Order တင်ခြင်း အောင်မြင်ပါသည်။ Admin မှ ငွေလွှဲပြေစာစစ်ဆေးပြီး ချက်ချင်းထည့်ပေးပါမည်။');
+        
+        slipBase64 = '';
+        document.getElementById('slip-file').value = '';
+        document.getElementById('slip-preview').style.display = 'none';
+        renderOrders();
+        renderUsersAdmin();
+
+        const orderNavBtn = document.querySelectorAll('.nav-item')[1];
+        if (orderNavBtn) {
+            switchPage('orders', orderNavBtn);
+        }
+    }
+
+    function switchPage(page, btn) {
+        if (page === 'admin' && currentUser.role !== 'admin') {
+            return;
+        }
+
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+
+        document.getElementById('page-shop').classList.add('hidden');
+        document.getElementById('page-orders').classList.remove('active');
+        document.getElementById('page-chat').classList.remove('active');
+        document.getElementById('page-account').classList.remove('active');
+        document.getElementById('page-admin').classList.remove('active');
+
+        if (page === 'shop') {
+            document.getElementById('page-shop').classList.remove('hidden');
+            applyOperatorVisibilityUI();
+        } else if (page === 'orders') {
+            document.getElementById('page-orders').classList.add('active');
+            renderOrders();
+        } else if (page === 'chat') {
+            document.getElementById('page-chat').classList.add('active');
+            renderMessages();
+        } else if (page === 'account') {
+            document.getElementById('page-account').classList.add('active');
+            document.getElementById('edit-buyer-phone').value = currentUser.phone;
+            document.getElementById('edit-buyer-pass').value = currentUser.pass || '';
+        } else if (page === 'admin') {
+            document.getElementById('page-admin').classList.add('active');
+            applyOperatorVisibilityUI();
+            renderPriceEditor();
+            renderUsersAdmin();
+            renderOrders();
+            renderMessages();
+        }
+        applyShopStateUI();
+    }
+
+    function handleAdminProofFile(event, index) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                adminProofMap[index] = e.target.result;
+                const previewEl = document.getElementById(`admin-proof-preview-${index}`);
+                if (previewEl) {
+                    previewEl.src = e.target.result;
+                    previewEl.style.display = 'block';
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function updateDailySummary(orders) {
+        let billSum = 0;
+        let dataSum = 0;
+        let planSum = 0;
+        let otherOpSum = 0;
+
+        orders.forEach(ord => {
+            if (ord.approved) {
+                const amt = Number(ord.price) || 0;
+                const titleLower = (ord.packageTitle || '').toLowerCase();
+                const cat = ord.category || (titleLower.includes('data') ? 'data' : (titleLower.includes('plan') ? 'plan' : 'bill'));
+
+                if (cat === 'data') {
+                    dataSum += amt;
+                } else if (cat === 'plan') {
+                    planSum += amt;
+                } else if (['mytel', 'u9', 'mpt'].includes(cat)) {
+                    otherOpSum += amt;
+                } else {
+                    billSum += amt;
+                }
+            }
+        });
+
+        const totalSum = billSum + dataSum + planSum + otherOpSum;
+        document.getElementById('sum-bill').innerText = `${billSum.toLocaleString()} Ks`;
+        document.getElementById('sum-data').innerText = `${dataSum.toLocaleString()} Ks`;
+        document.getElementById('sum-plan').innerText = `${planSum.toLocaleString()} Ks`;
+        document.getElementById('sum-other-op').innerText = `${otherOpSum.toLocaleString()} Ks`;
+        document.getElementById('sum-total').innerText = `${totalSum.toLocaleString()} Ks`;
+    }
+
+    function deleteSingleOrder(index) {
+        if (!currentUser || currentUser.role !== 'admin') return;
+        const orders = JSON.parse(localStorage.getItem('atom_orders')) || [];
+        const target = orders[index];
+        if (!target) return;
+
+        if (confirm(`${target.id} (${target.buyerName} - ${target.packageTitle}) ပြေစာ/အော်ဒါကို ဖျက်ရှင်းမှာ သေချာပါသလား?`)) {
+            orders.splice(index, 1);
+            adminProofMap = {};
+            localStorage.setItem('atom_orders', JSON.stringify(orders));
+            renderOrders();
+            renderUsersAdmin();
+        }
+    }
+
+    function clearAllOrders() {
+        if (!currentUser || currentUser.role !== 'admin') return;
+        if (confirm('တစ်နေ့တာ အော်ဒါစာရင်းနှင့် ပြေစာအားလုံးကို All ဖျက်ရှင်းမှာ သေချာပါသလား?')) {
+            localStorage.removeItem('atom_orders');
+            adminProofMap = {};
+            renderOrders();
+            renderUsersAdmin();
+            alert('တစ်နေ့တာ စာရင်းအားလုံးကို ဖျက်ရှင်းပြီးပါပြီ။');
+        }
+    }
+
+    function renderOrders() {
+        const orders = JSON.parse(localStorage.getItem('atom_orders')) || [];
+        const userList = document.getElementById('user-orders-list');
+        const adminList = document.getElementById('admin-orders-list');
+
+        updateDailySummary(orders);
+
+        userList.innerHTML = '';
+        adminList.innerHTML = '';
+
+        if (orders.length === 0) {
+            userList.innerHTML = '<p style="font-size:13px; color:#64748b;">အော်ဒါမှတ်တမ်း မရှိသေးပါ။</p>';
+            adminList.innerHTML = '<p style="font-size:13px; color:#64748b;">ဝင်လာသော အော်ဒါ မရှိသေးပါ။</p>';
+            return;
+        }
+
+        orders.forEach((ord, index) => {
+            const badgeClass = ord.approved ? 'badge-done' : 'badge-pending';
+            const statusText = ord.approved ? '✅ ထည့်ပေးပြီးပါပြီ' : '⏳ Admin စစ်ဆေးနေဆဲ';
+
+            const userProofHtml = ord.approved && ord.adminProof
+                ? `<div class="admin-proof-box">
+                     <div style="font-size:12px; font-weight:700; color:#166534;">📸 Admin မှ ထည့်ပေးပြီးကြောင်း ပြေစာ / SS</div>
+                     <img src="${ord.adminProof}" class="proof-img" alt="Admin Proof">
+                   </div>`
+                : '';
+
+            userList.innerHTML += `
+                <div class="order-card">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                        <strong>${ord.packageTitle}</strong>
+                        <span class="badge ${badgeClass}">${statusText}</span>
+                    </div>
+                    <div style="font-size:13px; color:#475569;">ဖုန်းနံပါတ်: <b>${ord.targetPhone}</b></div>
+                    <div style="font-size:13px; color:#475569;">ကျသင့်ငွေ: <b>${ord.price.toLocaleString()} Ks</b></div>
+                    <div style="font-size:11px; color:#94a3b8; margin-top:4px;">${ord.time}</div>
+                    ${userProofHtml}
+                </div>
+            `;
+
+            const adminActionHtml = !ord.approved
+                ? `<div class="admin-proof-box">
+                     <label style="display:block; font-size:12px; font-weight:700; color:#166534; margin-bottom:5px;">
+                       ထည့်ပေးပြီးကြောင်း SS ပုံ ရွေးချယ်ပို့ရန် (မဖြစ်မနေတင်ပါ)
+                     </label>
+                     <input type="file" accept="image/*" onchange="handleAdminProofFile(event, ${index})" style="font-size:12px; width:100%;">
+                     <img id="admin-proof-preview-${index}" class="proof-img" style="display:none;" alt="Admin Proof Preview">
+                     <button class="btn-approve" onclick="approveOrder(${index})">ငွေလွှဲမှန်ကန်သည် (SS ပို့ပြီး ထည့်ပေးမည်)</button>
+                   </div>`
+                : (ord.adminProof
+                    ? `<div class="admin-proof-box">
+                         <div style="font-size:12px; font-weight:700; color:#166534;">✅ ဝယ်သူအကောင့်သို့ ပို့ပြီးသော SS</div>
+                         <img src="${ord.adminProof}" class="proof-img" alt="Sent Proof">
+                       </div>`
+                    : '');
+
+            adminList.innerHTML += `
+                <div class="order-card">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                        <strong>${ord.id} - ${ord.buyerName} (${ord.buyerPhone || ''})</strong>
+                        <span class="badge ${badgeClass}">${statusText}</span>
+                    </div>
+                    <div style="font-size:13px;">ဝယ်ယူမှု: <b>${ord.packageTitle} (${ord.price.toLocaleString()} Ks)</b></div>
+                    <div style="font-size:13px;">ထည့်ပေးရမည့်ဖုန်း: <b style="color:var(--primary);">${ord.targetPhone}</b></div>
+                    <div style="font-size:11px; color:#64748b; margin-bottom:6px;">အချိန်: ${ord.time}</div>
+                    <div style="font-size:12px; font-weight:600; color:#475569; margin-bottom:4px;">ဝယ်သူပို့သော ငွေလွှဲပြေစာ:</div>
+                    <img src="${ord.slip}" style="width:100%; max-height:180px; object-fit:contain; border-radius:8px; border:1px solid #cbd5e1;">
+                    ${adminActionHtml}
+                    <button class="btn-delete-order" onclick="deleteSingleOrder(${index})">🗑️ ပြေစာအမှား / အော်ဒါဖျက်မည်</button>
+                </div>
+            `;
+        });
+    }
+
+    function approveOrder(index) {
+        if (currentUser.role !== 'admin') return;
+        const orders = JSON.parse(localStorage.getItem('atom_orders')) || [];
+        const proofImg = adminProofMap[index];
+
+        if (!proofImg) {
+            alert('ကျေးဇူးပြု၍ ထည့်ပေးပြီးကြောင်း SS ပုံကို အရင်ရွေးချယ်ပေးပါ။');
+            return;
+        }
+
+        orders[index].approved = true;
+        orders[index].adminProof = proofImg;
+        localStorage.setItem('atom_orders', JSON.stringify(orders));
+        delete adminProofMap[index];
+
+        alert('SS ပုံနှင့်အတူ အတည်ပြုပြီး ဝယ်သူ၏ "ကျွန်ုပ်အော်ဒါ" ထဲသို့ ပို့ပေးလိုက်ပါပြီ။');
+        renderOrders();
+        renderUsersAdmin();
+    }
+</script>
+
+</body>
+</html>
