@@ -2132,14 +2132,42 @@
         }
 
         orders[index].approved = true;
-        orders[index].adminProof = proofImg;
-        localStorage.setItem('atom_orders', JSON.stringify(orders));
-        delete adminProofMap[index];
+        orders[index].adminProof = proofImg         
+        delete adminProofMap[index]; 
+const activeAdmin = getActiveAdmin();
+if (activeAdmin) {
+  orders[index].approvedByName = activeAdmin.name;
+  orders[index].approvedByPhone = activeAdmin.phone;
+  orders[index].approvedAt = new Date().toLocaleString();
+}
+localStorage.setItem('atom_orders', JSON.stringify(orders));
 
         alert('SS ပုံနှင့်အတူ အတည်ပြုပြီး ဝယ်သူ၏ "ကျွန်ုပ်အော်ဒါ" ထဲသို့ ပို့ပေးလိုက်ပါပြီ။');
         renderOrders();
         renderUsersAdmin();
     }
+    
+    const ADMINS = [
+  { name: 'Admin 1', phone: '09xxxxxxxxx', pin: '1234' },
+  { name: 'Admin 2', phone: '09yyyyyyyyy', pin: '5678' }
+];
+
+function loginAdmin(phone, pin) {
+  const found = ADMINS.find(
+    (adm) => adm.phone === phone.trim() && adm.pin === pin.trim()
+  );
+  if (!found) return null;
+  localStorage.setItem('active_admin', JSON.stringify(found));
+  return found;
+}
+
+function getActiveAdmin() {
+  try {
+    return JSON.parse(localStorage.getItem('active_admin')) || null;
+  } catch (e) {
+    return null;
+  }
+}
 </script>
 
 </body>
