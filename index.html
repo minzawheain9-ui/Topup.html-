@@ -2166,7 +2166,22 @@ async function pullServerMessages() {
             if (typeof renderMessages === 'function') renderMessages();
         }
     } catch (e) {}
+}const _oldAdminReply = typeof sendAdminReply === 'function' ? sendAdminReply : null;
+if (_oldAdminReply) {
+  sendAdminReply = async function(idx) {
+    await _oldAdminReply(idx);
+    const msgs = typeof getMessages === 'function' ? getMessages() : [];
+    if (msgs[idx] && CHAT_API_URL.includes('script.google.com')) {
+      fetch(CHAT_API_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: 'reply', ...msgs[idx] })
+      }).catch(() => {});
+    }
+  };
 }
+
 
 setInterval(() => {
     if (typeof currentUser !== 'undefined' && currentUser) pullServerMessages();
