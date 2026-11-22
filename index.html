@@ -2119,9 +2119,12 @@
         });
     }
 
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwqm6X5s0SwvhB1TT8JIRTh6N4sqeBeKEboqjD2whVv18iFrhgGoOCLTKoJprh2GVySUQ/exec';
+
     function approveOrder(index) {
-        if (currentUser.role !== 'admin') return;
+        if (!currentUser || currentUser.role !== 'admin') return;
         const orders = JSON.parse(localStorage.getItem('atom_orders')) || [];
+        const target = orders[index];
         const proofImg = adminProofMap[index];
 
         if (!proofImg) {
@@ -2129,50 +2132,63 @@
             return;
         }
 
-        orders[index].approved = true;
-        orders[index].adminProof = proofImg;
-        localStorage.setItem('atom_orders', JSON.stringify(orders));
-        delete adminProofMap[index];
-
-        alert('SS ပုံနှင့်အတူ အတည်ပြုပြီး ဝယ်သူ၏ "ကျွန်ုပ်အော်ဒါ" ထဲသို့ ပို့ပေးလိုက်ပါပြီ။');
-        renderOrders();
- renderUsersAdmin();
-    }// အရင်ကုဒ်ထဲမှာ ဒီ Link တစ်ကြောင်းပဲ ထည့်ပါ
-const CHAT_API_URL = 'https://script.google.com/macros/s/AKfycbxjh471qjciZd0fRyElxkuy5l8Mc7lj05kX_OUHIKfPfPh_7hKbhY_wIjZahSxp1umFVg/exec';
-
-// ရှိပြီးသား sendMessageToAdmin ပြီးတဲ့နောက်မှာ Server ဘက်ကို ထပ်ပို့ပေးမယ့် ဖြည့်စွက်ကုဒ်
-const _oldSendMsg = sendMessageToAdmin;
-sendMessageToAdmin = async function() {
-    await _oldSendMsg();
-    const msgs = getMessages();
-    if (msgs[0] && CHAT_API_URL.includes('script.google.com')) {
-        fetch(CHAT_API_URL, {
+        fetch(API_URL, {
             method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify({ action: 'send', ...msgs[0] })
-        }).catch(() => {});
+            body: JSON.stringify({
+                action: 'approveOrder',
+                id: target.id,
+                adminProof: proofImg
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data && data.ok) {
+                orders[index].approved = true;
+                orders[index].adminProof = proofImg;
+                localStorage.setItem('atom_orders', JSON.stringify(orders));
+                delete adminProofMap[index];
+                alert('SS ပုံနှင့်အတူ အတည်ပြုပြီး ဝယ်သူ၏ "ကျွန်ုပ်အော်ဒါ" ထဲသို့ ပို့ပေးလိုက်ပါပြီ။');
+                renderOrders();
+                renderUsersAdmin();
+                syncFromServer();
+            } else {
+                alert('Approve လုပ်ခြင်း မအောင်မြင်ပါ: ' + (data && data.error ? data.error : ''));
+            }
+        })
+        .catch(err => alert('Error: ' + err.message));
     }
-};
 
-// Server ထဲက စာတွေကို ပြန်ဆွဲဖတ်ပြီး ရှိပြီးသား renderMessages() ကို ပြန်ခေါ်ပေးမယ့် ကုဒ်
-async function pullServerMessages() {
-    if (!CHAT_API_URL.includes('script.google.com')) return;
-    try {
-        const res = await fetch(CHAT_API_URL + '?t=' + Date.now());
-        const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
-            saveMessages(data);
-            if (typeof renderMessages === 'function') renderMessages();
+    async function syncFromServer() {
+        if (!API_URL || !API_URL.startsWith('http')) return;
+        try {
+            const res = await fetch(API_URL + '?t=' + Date.now());
+            const data = await res.json();
+            if (!data || !data.ok) return;
+
+            const newOrders = Array.isArray(data.orders) ? data.orders.slice().reverse() : [];
+            const newMsgs = Array.isArray(data.messages) ? data.messages.slice().reverse() : [];
+
+            localStorage.setItem('atom_orders', JSON.stringify(newOrders));
+            localStorage.setItem('atom_messages', JSON.stringify(newMsgs));
+
+            if (currentUser) {
+                if (typeof renderOrders === 'function') renderOrders();
+                if (typeof renderMessages === 'function') renderMessages();
+                if (currentUser.role === 'admin' && typeof renderUsersAdmin === 'function') renderUsersAdmin();
+            }
+        } catch (e) {}
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        if (!document.getElementById('live-alert-toast')) {
+            const toast = document.createElement('div');
+            toast.id = 'live-alert-toast';
+            toast.style.cssText = 'display:none; position:fixed; top:14px; left:50%; transform:translateX(-50%); background:#0f172a; color:#fff; padding:10px 16px; border-radius:10px; font-size:13px; font-weight:700; z-index:9999; box-shadow:0 6px 18px rgba(0,0,0,0.25); max-width:90%; text-align:center;';
+            document.body.appendChild(toast);
         }
-    } catch (e) {}
-}
-
-setInterval(() => {
-    if (typeof currentUser !== 'undefined' && currentUser) pullServerMessages();
-}, 10000);
-
+        syncFromServer();
+        setInterval(syncFromServer, 8000);
+    });
 </script>
-
 </body>
-    </html>
+</html>
