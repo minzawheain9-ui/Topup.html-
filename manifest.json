@@ -1,25 +1,20 @@
 {
-  "name": "Atom Topup",
-  "short_name": "Atom Topup",
-  "description": "လျင်မြန်စိတ်ချရသော ငွေဖြည့်နှင့် ဒေတာဝန်ဆောင်မှု",
-  "start_url": "./",
-  "scope": "./",
+  "name": "Topup",
+  "short_name": "Topup",
+  "start_url": "./Topup.html",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#0f172a",
-  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#0d6efd",
   "icons": [
     {
-      "src": "logo11_20_215919.png",
+      "src": "icon-192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
+      "type": "image/png"
     },
     {
-      "src": "logo11_20_215919.png",
+      "src": "icon-512.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
   ]
 }
